@@ -27,6 +27,7 @@
  if(navigator.share)mk('Share…',async()=>{try{await navigator.share({title:'Piano Library',text:'Piano Library — free piano scores with playback',url})}catch{}},true);
  mk('Send via LINE',()=>window.open('https://line.me/R/share?text='+encodeURIComponent('Piano Library 鋼琴譜 '+url),'_blank','noopener'),!navigator.share);
  const copy=mk('Copy link',async()=>{try{await navigator.clipboard.writeText(url);copy.textContent='Copied'}catch{copy.textContent='Press and hold the link to copy it'}});
+ if(window.PIANO_VISIT_LOG?.action)mk('Change my name',()=>{dialog.close();window.PIANO_CHANGE_VISITOR_ID?.()});
  mk('Close',()=>dialog.close());
  const version=document.createElement('p');version.style.cssText='font-size:12px;color:#8a8d80;margin:14px 0 0';
  dialog.append(title,img,info,link,row,version);document.body.append(dialog);
