@@ -15,12 +15,20 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape')toggle(false)});
  }
  const button=document.getElementById('shareMobile');if(!button)return;
+ button.setAttribute('aria-label','Share the piano library');
+ const url=window.PIANO_HOSTING?.url||location.origin;
  const dialog=document.createElement('dialog');dialog.id='shareDialog';
- const title=document.createElement('h2');title.textContent='Phone / iPad Open score library';
- const img=document.createElement('img');img.src='mobile-entry-qr.png';img.alt='QR code for the score app';
- const link=document.createElement('a');link.href=window.PIANO_HOSTING?.url||location.origin;link.textContent=link.href;link.target='_blank';link.rel='noopener';
- const info=document.createElement('p');info.textContent='Scan with your iPhone or iPad camera. No sign-in is needed. Use Wi-Fi or mobile data; this computer does not need to stay on.';
- const copy=document.createElement('button');copy.textContent='Copy link';copy.onclick=async()=>{try{await navigator.clipboard.writeText(link.href);copy.textContent='Copied'}catch{copy.textContent='Press and hold the link to copy it'}};
- const close=document.createElement('button');close.textContent='Close';close.onclick=()=>dialog.close();
- dialog.append(title,img,link,info,copy,close);document.body.append(dialog);button.onclick=()=>dialog.showModal();
+ const title=document.createElement('h2');title.textContent='Share Piano Library';
+ const img=document.createElement('img');img.src='mobile-entry-qr.png';img.alt='QR code for the piano library';
+ const info=document.createElement('p');info.textContent='Anyone can scan this QR code with an iPhone, iPad or Android camera. No sign-in is needed, on Wi-Fi or mobile data.';
+ const link=document.createElement('a');link.href=url;link.textContent=url;link.target='_blank';link.rel='noopener';
+ const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-top:12px';
+ const mk=(text,fn,primary)=>{const b=document.createElement('button');b.type='button';b.textContent=text;b.onclick=fn;if(primary)b.style.cssText='background:#233c35;color:#fff;border:0;border-radius:10px';row.append(b);return b};
+ if(navigator.share)mk('Share…',async()=>{try{await navigator.share({title:'Piano Library',text:'Piano Library — free piano scores with playback',url})}catch{}},true);
+ mk('Send via LINE',()=>window.open('https://line.me/R/share?text='+encodeURIComponent('Piano Library 鋼琴譜 '+url),'_blank','noopener'),!navigator.share);
+ const copy=mk('Copy link',async()=>{try{await navigator.clipboard.writeText(url);copy.textContent='Copied'}catch{copy.textContent='Press and hold the link to copy it'}});
+ mk('Close',()=>dialog.close());
+ const version=document.createElement('p');version.style.cssText='font-size:12px;color:#8a8d80;margin:14px 0 0';
+ dialog.append(title,img,info,link,row,version);document.body.append(dialog);
+ button.onclick=()=>{version.textContent=window.PIANO_VERSION_LABEL||'';dialog.showModal()};
 })();
