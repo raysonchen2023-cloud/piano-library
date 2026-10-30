@@ -1,0 +1,1 @@
+Salamander Grand Piano V3 by Alexander Holm. MP3 distribution: Tone.js audio repository. CC BY 3.0 Unported: https://creativecommons.org/licenses/by/3.0/ . Samples unmodified; nearest-note transposition during playback. https://github.com/Tonejs/audio/tree/master/salamander ; https://github.com/sfzinstruments/SalamanderGrandPiano

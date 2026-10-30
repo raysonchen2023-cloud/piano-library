@@ -1,0 +1,1 @@
+window.PIANO_HOSTING={url:'https://raysonchen2023-cloud.github.io/piano-library/app.html',private:false};
