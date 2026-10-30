@@ -38,7 +38,7 @@
  function progress(detail){
   state=detail;const list=entries().slice().sort((a,b)=>a.time-b.time);let current=list.filter(m=>m.time<=detail.time+.001).at(-1);
   const id=current?.id||'';
-  $('barNow').textContent=current?'Measure '+(current.printedNumber??current.number)+'（'+(current.id?.startsWith('oa-')?'Estimated scan alignment':current.auto?'Auto-aligned':'Aligned')+'）':'Reference measure '+detail.bar+' measure（Not aligned to this edition）';
+  $('barNow').textContent=current?'Measure '+(current.printedNumber??current.number)+'（'+(/^(oa-|auto-)/.test(current.id||'')?'Estimated scan alignment':current.auto?'Auto-aligned':'Aligned')+'）':'Reference measure '+detail.bar+' measure（Not aligned to this edition）';
   if(current&&$('followPage').checked&&current.page!==page&&!editing){window.dispatchEvent(new CustomEvent('score-goto',{detail:{page:current.page}}))}
   if(id!==activeId||currentKey!==key()){activeId=id;currentKey=key();paint()}
  followCursor();
