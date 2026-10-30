@@ -2,6 +2,12 @@
  const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),file=params.get('file');
  const overlay=$('barOverlay'),NS='http://www.w3.org/2000/svg';let page=1,state={time:0,bar:1,barStart:0},marks={},editing=false,corner=null,activeId='',currentKey='';
  try{marks=JSON.parse(localStorage.getItem('piano-bar-alignments-v1')||'{}')||{}}catch{}
+
+ const display={hideGuides:true,highlight:true};
+ try{const saved=JSON.parse(localStorage.getItem('piano-measure-display-v1')||'{}');if(typeof saved.hideGuides==='boolean')display.hideGuides=saved.hideGuides;if(typeof saved.highlight==='boolean')display.highlight=saved.highlight}catch{}
+ $('hideMeasureGuides').checked=display.hideGuides;$('highlightMeasure').checked=display.highlight;
+ function displayChanged(){display.hideGuides=$('hideMeasureGuides').checked;display.highlight=$('highlightMeasure').checked;try{localStorage.setItem('piano-measure-display-v1',JSON.stringify(display))}catch{}paint()}
+ $('hideMeasureGuides').onchange=displayChanged;$('highlightMeasure').onchange=displayChanged;
  const key=()=>JSON.stringify([file,$('performance').value]);
  let timeline=new Map(),timelineId='',lastScrolledId='';
  const entries=()=>{
@@ -21,9 +27,10 @@
   }
   const list=[...boxes.values()];
   for(const m of list){
-   const rect=document.createElementNS(NS,'rect');rect.setAttribute('x',m.x*1000);rect.setAttribute('y',m.y*1000);rect.setAttribute('width',m.w*1000);rect.setAttribute('height',m.h*1000);rect.setAttribute('fill','transparent');rect.setAttribute('stroke',editing?'#5f8c7c':'none');rect.setAttribute('stroke-width',m.id===activeId?'3':'1');rect.style.cursor='pointer';rect.onclick=e=>{if(editing)return;e.stopPropagation();window.dispatchEvent(new CustomEvent('piano-seek',{detail:{time:m.time}}))};overlay.append(rect);
-   if(!editing&&m.id!==activeId)continue;
-   const line=document.createElementNS(NS,'line');line.setAttribute('x1',m.x*1000);line.setAttribute('x2',m.x*1000);line.setAttribute('y1',m.y*1000);line.setAttribute('y2',(m.y+m.h)*1000);line.setAttribute('stroke',m.id===activeId?'#d74a00':'#24709b');line.setAttribute('stroke-width',m.id===activeId?'1.5':'1');line.setAttribute('stroke-dasharray',m.id===activeId?'':'7 5');line.setAttribute('vector-effect','non-scaling-stroke');line.style.pointerEvents='none';line.style.mixBlendMode='multiply';line.setAttribute('opacity',m.id===activeId?'.8':'.45');if(m.id===activeId)line.setAttribute('data-active','true');overlay.append(line);
+   const active=display.highlight&&m.id===activeId;
+   const rect=document.createElementNS(NS,'rect');rect.setAttribute('x',m.x*1000);rect.setAttribute('y',m.y*1000);rect.setAttribute('width',m.w*1000);rect.setAttribute('height',m.h*1000);rect.setAttribute('fill','transparent');rect.setAttribute('stroke',editing?'#5f8c7c':active?'#d74a00':'none');rect.setAttribute('stroke-width',active?'1.5':'1');rect.setAttribute('vector-effect','non-scaling-stroke');rect.style.mixBlendMode='multiply';rect.style.cursor='pointer';rect.onclick=e=>{if(editing)return;e.stopPropagation();window.dispatchEvent(new CustomEvent('piano-seek',{detail:{time:m.time}}))};overlay.append(rect);
+   if(!editing&&display.hideGuides&&!active)continue;
+   const line=document.createElementNS(NS,'line');line.setAttribute('x1',m.x*1000);line.setAttribute('x2',m.x*1000);line.setAttribute('y1',m.y*1000);line.setAttribute('y2',(m.y+m.h)*1000);line.setAttribute('stroke',active?'#d74a00':'#24709b');line.setAttribute('stroke-width',active?'1.5':'1');line.setAttribute('stroke-dasharray',active?'':'7 5');line.setAttribute('vector-effect','non-scaling-stroke');line.style.pointerEvents='none';line.style.mixBlendMode='multiply';line.setAttribute('opacity',active?'.8':'.45');if(active)line.setAttribute('data-active','true');overlay.append(line);
   }
   overlay.style.pointerEvents=editing||list.length?'auto':'none';
   followCursor();

@@ -34,8 +34,8 @@ window.PERSONAL_SCORE_PRESETS=[{"id": "gangqinpu-canon-939025", "filenames": ["g
   const button=document.createElement('button');button.type='button';button.textContent='Import PDFs';button.setAttribute('aria-label','Import personal PDFs');button.className='text-button';host.append(button);
   const input=document.createElement('input');input.type='file';input.accept='application/pdf,.pdf';input.multiple=true;input.hidden=true;input.setAttribute('aria-label','Personal PDF files');document.body.append(input);
   const note=document.createElement('p');note.style.cssText='font:12px system-ui;color:#657469;line-height:1.5';note.textContent='Personal PDFs stay in this browser. Keep the originals. Import George Winston and other personal editions here.';host.after(note);
-  button.onclick=()=>input.click();input.onchange=async()=>{
-   if(!input.files.length)return;document.body.dataset.personalImporting='true';button.disabled=true;note.textContent='Saving personal PDFs on this device…';
+  button.onclick=()=>{document.body.dataset.personalImporting='true';input.click()};input.addEventListener('cancel',()=>{delete document.body.dataset.personalImporting});input.onchange=async()=>{
+   if(!input.files.length){delete document.body.dataset.personalImporting;return}document.body.dataset.personalImporting='true';button.disabled=true;note.textContent='Saving personal PDFs on this device…';
    try{const count=await window.importPersonalPdfs([...input.files]);note.textContent=count+' PDFs saved on this device.';location.reload()}
    catch(e){note.textContent=e.message+' Any PDFs already saved are kept. Reload to view them.';button.disabled=false}
    finally{delete document.body.dataset.personalImporting;input.value=''}
