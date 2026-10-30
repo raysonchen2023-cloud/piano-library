@@ -29,7 +29,13 @@ window.COMPOSER_YEARS={
  'Klaus Badelt':[1967,null],
  'Yann Tiersen':[1970,null],
  'Kristen Anderson-Lopez':[1972,null],
- 'Robert Lopez':[1975,null]
+ 'Robert Lopez':[1975,null],
+ 'Wilhelm Lutter':[1914,1999],      // printed on the score
+ 'Edward Weiss':[1962,null],
+ 'Seiichiro Kuribayashi':[1965,null],
+ '栗林誠一郎':[1965,null],
+ '李凯稠':[1981,null],
+ '钱雷':[1982,null]
 };
 // Chinese / Japanese names shown in Traditional Chinese for this reader.
 window.COMPOSER_DISPLAY={'久石譲':'久石讓','黎锦晖':'黎錦暉','钱雷':'錢雷','李凯稠':'李凱稠'};
@@ -38,3 +44,9 @@ window.composerWithYears=name=>String(name??'').split(' / ').map(part=>{
  const key=part.trim(),shown=window.COMPOSER_DISPLAY[key]||key,y=window.COMPOSER_YEARS[key];
  return y?`${shown} (${y[0]}–${y[1]??' '})`:shown;
 }).join(' / ');
+// Birth year for sorting; composers without known years sort last.
+window.composerBirth=name=>Math.min(...String(name??'').split(' / ').map(p=>window.COMPOSER_YEARS[p.trim()]?.[0]??Infinity));
+window.byComposerBirth=(a,b)=>window.composerBirth(a)-window.composerBirth(b)||String(a).localeCompare(String(b),'en');
+// Same people written in a different order in the catalog.
+window.COMPOSER_ALIAS={'Robert Lopez / Kristen Anderson-Lopez':'Kristen Anderson-Lopez / Robert Lopez'};
+window.normalizeComposers=rows=>{for(const r of rows||[])if(window.COMPOSER_ALIAS[r.composer])r.composer=window.COMPOSER_ALIAS[r.composer];return rows};

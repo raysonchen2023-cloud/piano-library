@@ -1,6 +1,6 @@
 (()=>{
  const $=id=>document.getElementById(id),all=window.CATALOG?.rows||[];
- const rows=all.filter(r=>r.downloaded&&r.file&&r.scoreFormat?.status==='accepted');
+ (window.normalizeComposers||(x=>x))(all);const rows=all.filter(r=>r.downloaded&&r.file&&r.scoreFormat?.status==='accepted');
  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))||fallback}catch{return fallback}};
  let favorites=new Set(read('chopin-favorites',[])),recent=read('piano-reader-history',[]),screen='home',composer='',topic='',limit=40;
@@ -28,7 +28,7 @@ function compareOpus(a,b){const ak=opusKey(a),bk=opusKey(b);for(let i=0;i<ak.len
  document.querySelector('.bottom-tabs').onclick=e=>{const b=e.target.closest('[data-screen]');if(b)show(b.dataset.screen)};$('findMusic').onclick=()=>{show('library');$('touchSearch').focus()};$('seeFavorites').onclick=()=>show('favorites');
  document.querySelector('main').onclick=e=>{const b=e.target.closest('[data-favorite]');if(!b)return;favorites.has(b.dataset.favorite)?favorites.delete(b.dataset.favorite):favorites.add(b.dataset.favorite);try{localStorage.setItem('chopin-favorites',JSON.stringify([...favorites]))}catch{}paint()};
  $('topicChips').onclick=e=>{const b=e.target.closest('[data-topic]');if(b){topic=b.dataset.topic;limit=40;paint()}};$('touchSearch').oninput=()=>{limit=40;paint()};$('touchMore').onclick=()=>{limit+=40;paint()};$('clearFilters').onclick=()=>{composer=topic='';$('touchSearch').value='';limit=40;paint()};
- const composers=[...new Set(rows.map(r=>r.composer))];function composerButtons(){const q=$('composerSearch').value.toLowerCase();$('composerButtons').innerHTML=['',...composers].filter(c=>!q||c.toLowerCase().includes(q)).map(c=>`<button data-composer="${esc(c)}">${esc(c?(window.composerWithYears||(x=>x))(c):'All composers')}</button>`).join('')}
+ const composers=[...new Set(rows.map(r=>r.composer))].sort(window.byComposerBirth||undefined);function composerButtons(){const q=$('composerSearch').value.toLowerCase();$('composerButtons').innerHTML=['',...composers].filter(c=>!q||c.toLowerCase().includes(q)).map(c=>`<button data-composer="${esc(c)}">${esc(c?(window.composerWithYears||(x=>x))(c):'All composers')}</button>`).join('')}
  $('chooseComposer').onclick=()=>{composerButtons();$('composerSheet').showModal()};$('composerSearch').oninput=composerButtons;$('closeComposer').onclick=()=>$('composerSheet').close();$('composerButtons').onclick=e=>{const b=e.target.closest('[data-composer]');if(b){composer=b.dataset.composer;limit=40;$('composerSheet').close();paint()}};
  show(['home','library','favorites'].includes(previous.screen)?previous.screen:'home');
 })();

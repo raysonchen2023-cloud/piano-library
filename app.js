@@ -1,4 +1,4 @@
-const allRows=window.CATALOG?.rows||[];
+const allRows=(window.normalizeComposers||(x=>x))(window.CATALOG?.rows||[]);
 const rows=allRows.filter(r=>r.downloaded&&r.file&&!r.linkOnly&&r.scoreFormat?.status==='accepted');
 const $=id=>document.getElementById(id);
 let category='',onlyFav=false,favs=new Set(),visibleLimit=60,restoringView=true;
@@ -13,7 +13,8 @@ function saveView(updateUrl=true,selected=''){
 }
 const downloadHref=r=>window.PDF_PARTS?.[r.file]?.[0]?.file||r.file;
 const readerHref=r=>(location.protocol==='file:'?'http://127.0.0.1:18849/':'')+'viewer.html?file='+encodeURIComponent(r.file)+'&id='+encodeURIComponent(r.id)+(r.startPage?'&page='+r.startPage:'')+'&return='+encodeURIComponent('index.html?'+new URLSearchParams(viewState(r.id)).toString());
-const composerOrder=[...new Set(['Fryderyk Chopin','Liszt Ferenc','Robert Schumann','Franz Schubert','Johann Sebastian Bach','Ludwig van Beethoven','Сергей Рахманинов','Wolfgang Amadeus Mozart','Charles-Louis Hanon','Carl Czerny',...allRows.map(r=>r.composer||'Fryderyk Chopin')])];
+// Composers in chronological order (birth year); unknown years last.
+const composerOrder=[...new Set(allRows.map(r=>r.composer||'Fryderyk Chopin'))].sort(window.byComposerBirth||undefined);
 function opusKey(r){
   const text=(r.opus||'')+' '+r.title;
   const matches=[...text.matchAll(/\b(Op(?:us)?\.?|BWV|D\.|S\.|B\.|WoO|Hess)\s*(\d+)(?:\s*[,/:.-]?\s*(?:No\.?|Nr\.?|n[º°])\s*(\d+))?/ig)];
