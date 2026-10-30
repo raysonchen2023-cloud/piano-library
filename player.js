@@ -4,8 +4,8 @@
  const composer=row?.composer||'Fryderyk Chopin';
  const parts=r=>{const ms=[...((r.opus||'')+' '+r.title).matchAll(/(Op(?:us)?\.?|BWV|D\.|S\.|B\.|K[V]?\.?|O)\s*(\d+)(?:\s*[,/.]?\s*(?:No\.?|Nr\.?)\s*(\d+))?/ig)];const m=ms.find(x=>x[3]&&x[2]===ms[0]?.[2])||ms[0];return m?{key:m[1].toLowerCase().replace(/opus|o$/,'op').replace('.','')+m[2],sub:Number(m[3]||0)}:{key:'',sub:0}};const op=r=>parts(r).key;
  const related=rows.filter(r=>r.file===file&&r.opus).map(op);
- const exact=all.filter(p=>p.file===file);
- const reference=all.filter(p=>p.composer===composer&&((row?.opus&&op(p)===op(row)&&(!parts(row).sub||parts(row).sub===parts(p).sub))||(!row?.opus&&related.includes(op(p)))));
+ const exact=all.filter(p=>p.file===file&&(!row?.opus||op(p)===op(row))&&(!parts(row||{}).sub||parts(row).sub===parts(p).sub));
+ const reference=all.filter(p=>p.composer===composer&&((row?.opus&&op(p)===op(row)&&(!parts(row).sub||parts(row).sub===parts(p).sub))));
  let choices=exact.length?exact:reference;
  // Never substitute an unrelated piece merely because its composer matches.
  const mapping=new Map(choices.map(p=>[p.id,p]));
