@@ -18,10 +18,19 @@
  const sampleNotes=[21,...Array.from({length:29},(_,i)=>24+i*3)];
  const noteName=n=>['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'][n%12]+(Math.floor(n/12)-1);
  const timeLabel=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
+ try{const saved=JSON.parse(sessionStorage.getItem('piano-update-restore')||'null');if(saved?.file===file&&mapping.has(saved.performance)){sessionStorage.removeItem('piano-update-restore');$('performance').value=saved.performance;position=Math.max(0,Number(saved.time)||0);speed=Math.max(.4,Math.min(1.6,Number(saved.speed)||1));$('speed').value=speed;$('volume').value=Math.max(0,Math.min(.8,Number(saved.volume)||.45));$('clock').textContent=timeLabel(position)+' / —'}}catch{}
  function current(){return playing?Math.min(data?.duration||0,position+(context.currentTime-startedAt)*speed):position}
+ // The render clock leads the sound reaching the speakers. Use the audio
+ // device timestamp for the score display; keep scheduling on the render clock.
+ function audibleCurrent(){
+  if(!playing||!context)return position;
+  let audioTime=context.currentTime-(context.outputLatency||context.baseLatency||0);
+  try{const stamp=context.getOutputTimestamp?.();if(stamp?.contextTime>0&&stamp.performanceTime>0)audioTime=Math.min(context.currentTime,stamp.contextTime+(performance.now()-stamp.performanceTime)/1000)}catch{}
+  return Math.max(0,Math.min(data?.duration||0,position+(audioTime-startedAt)*speed));
+ }
  function silence(){for(const voice of active){try{voice.stop()}catch{}}active=[]}
  function pause(){if(playing)position=current();playing=false;clearInterval(timer);silence();$('pause').disabled=true;$('play').disabled=loading;$('play').textContent='▶ Play piano';update()}
- function update(){if(data)$('speedValue').textContent=(data.tempoProvided===false?'Reference tempo ':'Source tempo ')+Math.round(speed*100)+'%';const t=current();$('seek').value=t;$('clock').textContent=timeLabel(t)+' / '+timeLabel(data?.duration||0);const bar=data?.bars?.filter(b=>b.time<=t).at(-1);const tempo=data?.tempos?.filter(b=>b.time<=t).at(-1);if($('tempoNow'))$('tempoNow').textContent=tempo?`${Math.round(tempo.bpm*speed)} BPM${data?.tempoProvided===false?' · Reference tempo (not marked in score)':speed===1?' · Source tempo':''}`:'No explicit BPM in the source';window.dispatchEvent(new CustomEvent('piano-progress',{detail:{time:t,bar:bar?.number||1,performanceId:$('performance').value,playing,barStart:bar?.time||0}}))}
+ function update(){if(data)$('speedValue').textContent=(data.tempoProvided===false?'Reference tempo ':'Source tempo ')+Math.round(speed*100)+'%';const t=audibleCurrent();$('seek').value=t;$('clock').textContent=timeLabel(t)+' / '+timeLabel(data?.duration||0);const bar=data?.bars?.filter(b=>b.time<=t).at(-1);const tempo=data?.tempos?.filter(b=>b.time<=t).at(-1);if($('tempoNow'))$('tempoNow').textContent=tempo?`${Math.round(tempo.bpm*speed)} BPM${data?.tempoProvided===false?' · Reference tempo (not marked in score)':speed===1?' · Source tempo':''}`:'No explicit BPM in the source';window.dispatchEvent(new CustomEvent('piano-progress',{detail:{time:t,bar:bar?.number||1,performanceId:$('performance').value,playing,barStart:bar?.time||0}}))}
  async function load(){
   if(loading)return false;loading=true;$('play').disabled=true;
   try{
@@ -47,7 +56,7 @@
  $('speed').onchange=()=>{const resume=playing;pause();speed=Number($('speed').value);$('speedValue').textContent=speed.toFixed(2)+'×';if(resume)$('play').click()};
  $('originalTempo').onclick=()=>{const resume=playing;pause();speed=1;$('speed').value=1;$('speedValue').textContent='Source tempo 100%';if(resume)$('play').click()};
  $('volume').oninput=()=>{if(master)master.gain.value=Number($('volume').value)};
- $('seek').oninput=()=>{const resume=playing;pause();position=Number($('seek').value);update();if(resume)$('play').click()};
+ $('seek').oninput=()=>{const target=Number($('seek').value),resume=playing;pause();position=target;update();if(resume)$('play').click()};
  window.addEventListener('piano-seek',e=>{const resume=playing;pause();position=Math.max(0,Math.min(data?.duration||0,Number(e.detail.time)||0));update();if(resume)$('play').click()});
  window.addEventListener('pagehide',()=>{pause();context?.close()});
 })();

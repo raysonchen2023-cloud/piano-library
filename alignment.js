@@ -3,25 +3,45 @@
  const overlay=$('barOverlay'),NS='http://www.w3.org/2000/svg';let page=1,state={time:0,bar:1,barStart:0},marks={},editing=false,corner=null,activeId='',currentKey='';
  try{marks=JSON.parse(localStorage.getItem('piano-bar-alignments-v1')||'{}')||{}}catch{}
  const key=()=>JSON.stringify([file,$('performance').value]);
- const entries=()=>marks[key()]||window.AUTO_ALIGNMENTS?.[key()]||[];
+ let timeline=new Map(),timelineId='',lastScrolledId='';
+ const entries=()=>{
+  const list=marks[key()]||window.AUTO_ALIGNMENTS?.[key()]||[];
+  return list.map(m=>m.auto&&timelineId===$('performance').value&&timeline.has(m.number)?{...m,time:timeline.get(m.number)}:m);
+ };
+ window.addEventListener('piano-loaded',e=>{timelineId=e.detail.performanceId;timeline=new Map((e.detail.bars||[]).map(b=>[b.number,b.time]));activeId='';paint()});
  function save(){try{localStorage.setItem('piano-bar-alignments-v1',JSON.stringify(marks))}catch{$('alignStatus').textContent='Unable to save locally. Export an alignment backup.'}}
  function paint(){
   overlay.replaceChildren();
-  const list=entries().filter(m=>m.page===page);
+  // Repeats revisit the same printed box. Draw it once so a later blue
+  // repeat marker cannot paint over the active orange cursor.
+  const boxes=new Map();
+  for(const m of entries().filter(m=>m.page===page)){
+   const k=[m.x,m.y,m.w,m.h].map(n=>Number(n).toFixed(5)).join(',');const prior=boxes.get(k);
+   if(!prior||m.id===activeId||(prior.id!==activeId&&Math.abs(m.time-state.time)<Math.abs(prior.time-state.time)))boxes.set(k,m);
+  }
+  const list=[...boxes.values()];
   for(const m of list){
    const rect=document.createElementNS(NS,'rect');rect.setAttribute('x',m.x*1000);rect.setAttribute('y',m.y*1000);rect.setAttribute('width',m.w*1000);rect.setAttribute('height',m.h*1000);rect.setAttribute('fill',m.id===activeId?'#ffd84d55':'transparent');rect.setAttribute('stroke',editing?'#5f8c7c':'none');rect.setAttribute('stroke-width',m.id===activeId?'3':'1');rect.style.cursor='pointer';rect.onclick=e=>{if(editing)return;e.stopPropagation();window.dispatchEvent(new CustomEvent('piano-seek',{detail:{time:m.time}}))};overlay.append(rect);
    const label=document.createElementNS(NS,'text');label.setAttribute('x',m.x*1000+4);label.setAttribute('y',m.y*1000+14);label.setAttribute('font-size','13');label.setAttribute('fill','#72500e');label.textContent='m. '+(m.printedNumber??m.number);overlay.append(label);
-   const line=document.createElementNS(NS,'line');line.setAttribute('x1',m.x*1000);line.setAttribute('x2',m.x*1000);line.setAttribute('y1',m.y*1000);line.setAttribute('y2',(m.y+m.h)*1000);line.setAttribute('stroke',m.id===activeId?'#d74a00':'#24709b');line.setAttribute('stroke-width',m.id===activeId?'4':'2');line.setAttribute('stroke-dasharray',m.id===activeId?'':'7 5');line.setAttribute('vector-effect','non-scaling-stroke');line.style.pointerEvents='none';overlay.append(line);
+   const line=document.createElementNS(NS,'line');line.setAttribute('x1',m.x*1000);line.setAttribute('x2',m.x*1000);line.setAttribute('y1',m.y*1000);line.setAttribute('y2',(m.y+m.h)*1000);line.setAttribute('stroke',m.id===activeId?'#d74a00':'#24709b');line.setAttribute('stroke-width',m.id===activeId?'4':'2');line.setAttribute('stroke-dasharray',m.id===activeId?'':'7 5');line.setAttribute('vector-effect','non-scaling-stroke');line.style.pointerEvents='none';if(m.id===activeId)line.setAttribute('data-active','true');overlay.append(line);
    label.setAttribute('paint-order','stroke');label.setAttribute('stroke','white');label.setAttribute('stroke-width','4');label.setAttribute('font-weight','bold');label.setAttribute('fill',m.id===activeId?'#ad3500':'#165779');
   }
   overlay.style.pointerEvents=editing||list.length?'auto':'none';
+  followCursor();
+ }
+ function followCursor(){
+  if(!state.playing||editing||!$('followPage').checked||!activeId||activeId===lastScrolledId)return;
+  const line=overlay.querySelector('[data-active]');if(!line)return;
+  lastScrolledId=activeId;const r=line.getBoundingClientRect();
+  if(r.top<85||r.bottom>window.innerHeight-90)line.scrollIntoView({block:'center',behavior:'smooth'});
  }
  function progress(detail){
-  state=detail;const list=entries().slice().sort((a,b)=>a.time-b.time);let current=list.filter(m=>m.time<=detail.time+.02).at(-1);
+  state=detail;const list=entries().slice().sort((a,b)=>a.time-b.time);let current=list.filter(m=>m.time<=detail.time+.001).at(-1);
   const id=current?.id||'';
-  $('barNow').textContent=current?'Measure '+(current.printedNumber??current.number)+'（'+(current.auto?'Auto-aligned':'Aligned')+'）':'Reference measure '+detail.bar+' measure（Not aligned to this edition）';
+  $('barNow').textContent=current?'Measure '+(current.printedNumber??current.number)+'（'+(current.id?.startsWith('oa-')?'Estimated scan alignment':current.auto?'Auto-aligned':'Aligned')+'）':'Reference measure '+detail.bar+' measure（Not aligned to this edition）';
   if(current&&$('followPage').checked&&current.page!==page&&!editing){window.dispatchEvent(new CustomEvent('score-goto',{detail:{page:current.page}}))}
   if(id!==activeId||currentKey!==key()){activeId=id;currentKey=key();paint()}
+ followCursor();
  if(!editing){$('alignBar').value=current?.number||detail.bar;$('alignTime').value=Number(detail.barStart||0).toFixed(2)}
  }
  window.addEventListener('piano-progress',e=>progress(e.detail));

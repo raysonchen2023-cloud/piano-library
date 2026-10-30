@@ -28,8 +28,9 @@
  mk('Send via LINE',()=>window.open('https://line.me/R/share?text='+encodeURIComponent('Piano Library 鋼琴譜 '+url),'_blank','noopener'),!navigator.share);
  const copy=mk('Copy link',async()=>{try{await navigator.clipboard.writeText(url);copy.textContent='Copied'}catch{copy.textContent='Press and hold the link to copy it'}});
  if(window.PIANO_VISIT_LOG?.action)mk('Change my name',()=>{dialog.close();window.PIANO_CHANGE_VISITOR_ID?.()});
+ const owner=document.createElement('a');owner.href='online.html';owner.textContent='Online viewers (owner)';owner.style.cssText='display:block;margin-top:14px';
  mk('Close',()=>dialog.close());
  const version=document.createElement('p');version.style.cssText='font-size:12px;color:#8a8d80;margin:14px 0 0';
- dialog.append(title,img,info,link,row,version);document.body.append(dialog);
+ dialog.append(title,img,info,link,row,version,owner);document.body.append(dialog);
  button.onclick=()=>{version.textContent=window.PIANO_VERSION_LABEL||'';dialog.showModal()};
 })();
