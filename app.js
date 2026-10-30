@@ -53,9 +53,9 @@ function render(){
  const rs=scoped(),q=normalize($('q').value),src=$('source').value,topic=$('topic').value;
  const unique=[...new Map(rs.filter(r=>r.downloaded).map(r=>[r.file,r])).values()];
  $('fileCount').textContent=unique.length;$('workCount').textContent=rs.filter(r=>cat(r)!=='Complete volumes').length;$('size').textContent=(unique.reduce((n,r)=>n+(r.bytes||0),0)/1e6).toFixed(1);
- let filtered=rs.filter(r=>(!topic||inCollection(r,topic))&&(!category||cat(r)===category)&&(!src||r.source===src)&&(!onlyFav||favs.has(r.id))&&normalize([r.title,r.opus,r.category,cat(r),r.source,...(r.tags||[]),composer(r),withYears(composer(r))].join(' ')).includes(q));
+ let filtered=rs.filter(r=>(!topic||inCollection(r,topic))&&(!category||cat(r)===category)&&(!src||r.source===src)&&(!onlyFav||favs.has(r.id))&&normalize([r.title,r.opus,r.category,cat(r),r.source,...(r.tags||[]),composer(r),(window.composerSearchText||withYears)(composer(r))].join(' ')).includes(q));
  const sort=$('sort').value;
- const matchesScope=r=>(!$('composer').value||composer(r)===$('composer').value)&&(!topic||(r.tags||[]).includes(topic))&&(!src||r.source===src)&&(!onlyFav||favs.has(r.id))&&normalize([r.title,r.opus,r.category,cat(r),r.source,...(r.tags||[]),composer(r),withYears(composer(r))].join(' ')).includes(q);
+ const matchesScope=r=>(!$('composer').value||composer(r)===$('composer').value)&&(!topic||(r.tags||[]).includes(topic))&&(!src||r.source===src)&&(!onlyFav||favs.has(r.id))&&normalize([r.title,r.opus,r.category,cat(r),r.source,...(r.tags||[]),composer(r),(window.composerSearchText||withYears)(composer(r))].join(' ')).includes(q);
  const pending=allRows.filter(r=>!r.downloaded&&matchesScope(r));
  const review=allRows.filter(r=>r.downloaded&&r.scoreFormat?.status!=='accepted'&&matchesScope(r));
  $('formatReview').hidden=!review.length;$('formatReviewTitle').textContent=`Other instrumentation / pending review (${review.length}  editions, not in the grand-staff list)`;

@@ -1,1 +1,1 @@
-window.PIANO_VERSION={"version": "2026.10.31-0531", "date": "2026-10-31"};
+window.PIANO_VERSION={"version": "2026.10.31-0548", "date": "2026-10-31"};

@@ -38,7 +38,7 @@ window.COMPOSER_YEARS={
  '钱雷':[1982,null]
 };
 // Chinese / Japanese names shown in Traditional Chinese for this reader.
-window.COMPOSER_DISPLAY={'久石譲':'久石讓','黎锦晖':'黎錦暉','钱雷':'錢雷','李凯稠':'李凱稠'};
+window.COMPOSER_DISPLAY={'\u0421\u0435\u0440\u0433\u0435\u0439 \u0420\u0430\u0445\u043c\u0430\u043d\u0438\u043d\u043e\u0432':'\u0421\u0435\u0440\u0433\u0435\u0439 \u0420\u0430\u0445\u043c\u0430\u043d\u0438\u043d\u043e\u0432 · Sergei Rachmaninoff','久石譲':'久石讓','黎锦晖':'黎錦暉','钱雷':'錢雷','李凯稠':'李凱稠'};
 // "(1810–1849)"; living composers "(1950– )".
 window.composerWithYears=name=>String(name??'').split(' / ').map(part=>{
  const key=part.trim(),shown=window.COMPOSER_DISPLAY[key]||key,y=window.COMPOSER_YEARS[key];
@@ -50,3 +50,6 @@ window.byComposerBirth=(a,b)=>window.composerBirth(a)-window.composerBirth(b)||S
 // Same people written in a different order in the catalog.
 window.COMPOSER_ALIAS={'Robert Lopez / Kristen Anderson-Lopez':'Kristen Anderson-Lopez / Robert Lopez'};
 window.normalizeComposers=rows=>{for(const r of rows||[])if(window.COMPOSER_ALIAS[r.composer])r.composer=window.COMPOSER_ALIAS[r.composer];return rows};
+
+window.COMPOSER_ALIASES={'\u0421\u0435\u0440\u0433\u0435\u0439 \u0420\u0430\u0445\u043c\u0430\u043d\u0438\u043d\u043e\u0432':['Sergei Rachmaninoff','Sergey Rachmaninov','Rachmaninoff','Rachmaninov','\u62c9\u8d6b\u66fc\u5c3c\u8afe\u592b']};
+window.composerSearchText=name=>[name,window.composerWithYears(name),...(window.COMPOSER_ALIASES[name]||[])].join(' ');
