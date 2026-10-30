@@ -48,7 +48,7 @@
     const r=await fetch(file+'?v='+encodeURIComponent(next.version),{cache:'reload'});if(!r.ok)throw Error('Download incomplete');await r.arrayBuffer();
    }));
    ready=true;offer();
-  }catch{if(notice)notice.textContent='Update download will retry automatically.'}finally{checking=false}
+  }catch{if(notice&&!ready)notice.textContent='Update download will retry automatically.'}finally{checking=false}
  }
  window.addEventListener('piano-progress',e=>{playing=!!e.detail.playing;lastTime=e.detail.time||0;if(!playing&&ready)apply()});
  for(const event of ['pointerdown','keydown','input'])document.addEventListener(event,()=>{lastInput=Date.now()},{passive:true});
