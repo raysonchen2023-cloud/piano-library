@@ -31,7 +31,10 @@ window.COMPOSER_YEARS={
  'Kristen Anderson-Lopez':[1972,null],
  'Robert Lopez':[1975,null]
 };
+// Chinese / Japanese names shown in Traditional Chinese for this reader.
+window.COMPOSER_DISPLAY={'久石譲':'久石讓','黎锦晖':'黎錦暉','钱雷':'錢雷','李凯稠':'李凱稠'};
+// "(1810–1849)"; living composers "(1950– )".
 window.composerWithYears=name=>String(name??'').split(' / ').map(part=>{
- const y=window.COMPOSER_YEARS[part.trim()];
- return y?`${part} (${y[1]?y[0]+'–'+y[1]:'b. '+y[0]})`:part;
+ const key=part.trim(),shown=window.COMPOSER_DISPLAY[key]||key,y=window.COMPOSER_YEARS[key];
+ return y?`${shown} (${y[0]}–${y[1]??' '})`:shown;
 }).join(' / ');
