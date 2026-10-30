@@ -9,8 +9,10 @@
  const next=document.createElement('button');next.textContent='Next';next.onclick=()=>$('next').click();
  const tools=document.createElement('button');tools.textContent='Tools';tools.onclick=()=>sheet(!$('surface').classList.contains('sheet-visible'));
  bar.append(home,prev,play,next,tools);document.body.append(bar);
- const heading=document.createElement('div');heading.id='touchReaderHeading';heading.textContent=row?.title||'Score';document.body.append(heading);
- const page=document.createElement('small');page.id='touchReaderPage';document.body.append(page);
+ const heading=document.createElement('div');heading.id='touchReaderHeading';const headingTitle=document.createElement('span');headingTitle.textContent=row?.title||'Score';headingTitle.className='reader-title';heading.append(headingTitle);document.body.append(heading);
+ const measure=document.createElement('strong');measure.id='touchReaderMeasure';measure.textContent='m. —';measure.setAttribute('aria-live','polite');heading.append(measure);
+ window.addEventListener('score-measure-state',e=>{const text=e.detail.number!==null?'m. '+e.detail.number:'Ref. m. '+e.detail.referenceNumber;if(measure.textContent!==text)measure.textContent=text});
+ const page=document.createElement('small');page.id='touchReaderPage';heading.append(page);
  const close=document.createElement('button');close.textContent='Close panel ⌄';close.className='close-reader-sheet';close.onclick=()=>sheet(false);document.querySelector('.player').prepend(close);
  function sheet(open){document.querySelector('.player').classList.toggle('sheet-open',open);$('surface').classList.toggle('sheet-visible',open);tools.setAttribute('aria-expanded',String(open))}
  function refresh(){prev.disabled=$('prev').disabled;next.disabled=$('next').disabled;play.textContent=$('performance').options.length===0?'YouTube':!$('pause').disabled?'Pause':'Play';page.textContent=$('page').value+' / '+$('total').textContent}

@@ -1,5 +1,6 @@
 // Only a visible public-library tab reports its user-chosen display name.
 (()=>{
+ if((new URLSearchParams(location.search).get('file')||'').startsWith('scores/personal/'))return;
  const api=window.PIANO_PRESENCE?.api;if(!api||/^(localhost|127\.0\.0\.1)$/.test(location.hostname)||location.protocol!=='https:')return;
  const read=k=>{try{return localStorage.getItem(k)||''}catch{return''}};
  const random=()=>crypto.randomUUID().replaceAll('-','');

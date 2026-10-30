@@ -9,7 +9,7 @@
  if(current.version==='local'||location.protocol==='file:')return;
  let checking=false,pending=null,ready=false,applying=false,lastInput=Date.now(),playing=false,lastTime=0,retry=null,notice;
  const status=text=>{if(!notice){notice=document.createElement('div');notice.id='automaticUpdateStatus';notice.setAttribute('role','status');notice.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:999;padding:12px 18px;border-radius:12px;background:#233c35;color:#fff;font:14px system-ui;max-width:90vw;box-shadow:0 4px 20px #0003';document.body.append(notice)}notice.textContent=text};
- const safe=()=>!playing&&document.visibilityState==='visible'&&!document.querySelector('dialog[open]')&&!document.getElementById('align')?.textContent.startsWith('Finish')&&Date.now()-lastInput>2500;
+ const safe=()=>!document.body?.dataset?.personalImporting&&!playing&&document.visibilityState==='visible'&&!document.querySelector('dialog[open]')&&!document.getElementById('align')?.textContent.startsWith('Finish')&&Date.now()-lastInput>2500;
  function apply(){
   if(!ready||applying)return;
   if(!safe()){status('Update downloaded. It will apply automatically when you finish playing or editing.');clearTimeout(retry);retry=setTimeout(apply,2000);return}

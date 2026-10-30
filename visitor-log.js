@@ -4,6 +4,7 @@
 //   window.PIANO_VISIT_LOG={action:'https://docs.google.com/forms/d/e/…/formResponse',
 //                           fields:{id:'entry.1',device:'entry.2',version:'entry.3'}};
 (()=>{
+ if((new URLSearchParams(location.search).get('file')||'').startsWith('scores/personal/'))return;
  const cfg=window.PIANO_VISIT_LOG;
  if(!cfg||!cfg.action||!cfg.fields?.id)return;                                // not set up yet
  if(location.protocol==='file:'||/^(127\.0\.0\.1|localhost)$/.test(location.hostname))return;   // owner's own computer
