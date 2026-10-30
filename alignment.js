@@ -55,7 +55,7 @@
  window.addEventListener('piano-progress',e=>progress(e.detail));
  window.addEventListener('score-rendered',e=>{page=e.detail.page;paint()});
  $('performance').addEventListener('change',()=>{activeId='';currentKey=key();paint()});
- $('align').onclick=()=>{editing=!editing;corner=null;$('align').textContent=editing?'Finish marking':'Mark a measure';$('alignStatus').textContent=editing?'Set the measure number and start time, then select its top-left and bottom-right corners, including both staves.':'Measure marking closed.';paint()};
+ $('align').onclick=()=>{editing=!editing;$('align').dataset.editing=String(editing);corner=null;$('align').textContent=editing?'Finish marking':'Mark a measure';$('alignStatus').textContent=editing?'Set the measure number and start time, then select its top-left and bottom-right corners, including both staves.':'Measure marking closed.';paint()};
  overlay.onclick=e=>{
   if(!editing)return;const r=overlay.getBoundingClientRect(),p={x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))};
   if(!corner){corner=p;$('alignStatus').textContent='Top-left selected. Now select the bottom-right corner.';return}
